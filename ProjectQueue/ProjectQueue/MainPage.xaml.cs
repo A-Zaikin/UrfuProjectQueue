@@ -14,5 +14,12 @@ namespace ProjectQueue
         {
             InitializeComponent();
         }
+
+        void Entry_Completed(object sender, EventArgs e)
+        {
+            var entry = ((Entry)sender);
+            var text = entry.Text;
+            DisplayAlert("Debug", text, "OK");
+        }
     }
 }

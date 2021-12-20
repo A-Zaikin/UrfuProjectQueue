@@ -19,6 +19,10 @@
                 </FormattedString>
             </Label.FormattedText>
         </Label>
+        <Entry 
+            x:Name="entry"
+            Text="Введите ссылку на Google Sheet"
+            Completed="Entry_Completed"/>
     </StackLayout>
 
 </ContentPage>
