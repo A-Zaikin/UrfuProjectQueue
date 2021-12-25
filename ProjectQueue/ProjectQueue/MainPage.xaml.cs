@@ -11,11 +11,14 @@ using System.Net.Http;
 
 using Xamarin.Forms;
 using Xamarin.Forms.PlatformConfiguration;
+using OfficeOpenXml;
 
 namespace ProjectQueue
 {
     public partial class MainPage : ContentPage
     {
+        private HttpClient client;
+
         private string debugLabel;
         public string DebugLabel
         {
@@ -33,18 +36,39 @@ namespace ProjectQueue
             BindingContext = this;
 
             DebugLabel = "New label text";
+            client = new HttpClient();
         }
 
         void EntryCompleted(object sender, EventArgs e)
         {
             var entry = (Entry)sender;
             var text = entry.Text;
-            DebugLabel = text;
+            //DebugLabel = text;
             var downloadUrl = FormDownloadUrl(text);
-            DebugLabel = downloadUrl;
-            //var resultTask = DownloadXlsxFile(downloadUrl);
-            //resultTask.Wait();
-            //DebugLabel = resultTask.Result;
+            //DebugLabel = downloadUrl;
+            var xlsxFile = DownloadXlsxFile(downloadUrl);
+            //DebugLabel = xlsxFile.Length.ToString();
+            var a1Value = OpenExcelFile(xlsxFile);
+            DebugLabel = a1Value;
+        }
+
+        string OpenExcelFile(byte[] xlsxFile)
+        {
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            using (MemoryStream ms = new MemoryStream(xlsxFile))
+            using (ExcelPackage package = new ExcelPackage(ms))
+            {
+                if (package.Workbook.Worksheets.Count == 0)
+                    return "Your Excel file does not contain any work sheets";
+                else
+                {
+                    foreach (ExcelWorksheet worksheet in package.Workbook.Worksheets)
+                    {
+                        return worksheet.Cells["A1"].Value.ToString();
+                    }
+                }
+            }
+            return "Something failed...";
         }
 
         string FormDownloadUrl(string inputUrl)
@@ -56,20 +80,10 @@ namespace ProjectQueue
             return downloadUrl;
         }
 
-        async Task<string> DownloadXlsxFile(string url)
+        byte[] DownloadXlsxFile(string url)
         {
-            var client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, new Uri(url));
-
-            var response = await client.SendAsync(request);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var responseContent = response.Content;
-                var json = await responseContent.ReadAsStringAsync();
-                return json;
-            }
-            else
-                return $"Download failed with code: {response.StatusCode}";
+            var response = client.GetByteArrayAsync(url);
+            return response.Result;
         }
     }
 }
