@@ -44,6 +44,8 @@ namespace ProjectQueue
             var teamCells = new List<ExcelRangeBase>();
             foreach (var cell in sheet.Cells)
             {
+                if (cell.Value == null)
+                    continue;
                 if (new Regex(@"^Комната ?\d*$").IsMatch(cell.Value.ToString())
                     || cell.Value.ToString() == "Название команды")
                 {

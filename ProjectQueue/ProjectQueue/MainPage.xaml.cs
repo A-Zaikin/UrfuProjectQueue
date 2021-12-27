@@ -9,7 +9,7 @@ namespace ProjectQueue
     public partial class MainPage : ContentPage
     {
         private INotificationManager notificationManager;
-
+        private IMessageManager messageManager;
         private string debugLabel;
         private Dictionary<string, string> teams;
         public string DebugLabel
@@ -27,6 +27,7 @@ namespace ProjectQueue
             InitializeComponent();
             notificationManager = DependencyService.Get<INotificationManager>();
             notificationManager.Initialize();
+            messageManager = DependencyService.Get<IMessageManager>();
             BindingContext = this;
 
             entry = (Entry)FindByName("entry");
@@ -44,12 +45,13 @@ namespace ProjectQueue
             DebugLabel = string.Join(" ", teams.Keys);
             teamPicker.ItemsSource = teams.Keys.ToList();
             teamPicker.IsVisible = true;
-            unsubscribeButton.IsVisible = true;
         }
 
         private void TeamPickerSelectedIndexChanged(object sender, EventArgs e)
         {
             var picker = (Picker)sender;
+            if (picker.SelectedIndex < 0)
+                return;
             var team = picker.Items[picker.SelectedIndex];
             DebugLabel = team;
             SpreadsheetManager.SubscribeToCell(teams[team], () =>
@@ -57,11 +59,15 @@ namespace ProjectQueue
                 notificationManager.SendNotification("Подошла Ваша очередь на защиту!", $"Вы представляете команду \"{team}\"");
                 SpreadsheetManager.Unsubscribe();
             });
+            unsubscribeButton.IsVisible = true;
+            messageManager.ShortAlert("Вы успешно подписаны");
         }
 
         private void UnsubscribeButtonPressed(object sender, EventArgs e)
         {
             SpreadsheetManager.Unsubscribe();
+            teamPicker.IsVisible = false;
+            unsubscribeButton.IsVisible = false;
         }
     }
 }

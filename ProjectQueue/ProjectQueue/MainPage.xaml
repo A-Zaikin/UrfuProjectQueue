@@ -10,21 +10,25 @@
         <Label 
             Text="{Binding DebugLabel}"
             IsVisible="False"/>
-        <StackLayout VerticalOptions="Center" HorizontalOptions="Center">
+        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="25">
             <Entry 
+                Margin="0,80,0,0" 
+                WidthRequest="300"
                 VerticalOptions="Center"
                 x:Name="entry"
-                Text="https://docs.google.com/spreadsheets/d/1LZU6GiXYLOFSbL5ZqImKqNYzYhWiueqONTh__dop4zI/edit#gid=2095115966"
                 Completed="EntryCompleted"
-                IsVisible="True"/>
+                IsVisible="True"
+                Keyboard="Url"
+                Placeholder="Ссылка на таблицу"/>
             <Picker
                 x:Name="teamPicker"
                 SelectedIndexChanged="TeamPickerSelectedIndexChanged"
+                Title="Выберите свою команду"
                 IsVisible="False"/>
-
+                
             <Button 
                 x:Name="unsubscribeButton"
-                Text="Unsubscribe"
+                Text="Отписаться"
                 Pressed="UnsubscribeButtonPressed"
                 IsVisible="False"/>
         </StackLayout>
