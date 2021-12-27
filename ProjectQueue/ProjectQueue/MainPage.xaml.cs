@@ -1,5 +1,6 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.Linq;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -10,6 +11,7 @@ namespace ProjectQueue
         private INotificationManager notificationManager;
 
         private string debugLabel;
+        private Dictionary<string, string> teams;
         public string DebugLabel
         {
             get { return debugLabel; }
@@ -36,16 +38,17 @@ namespace ProjectQueue
             var entry = (Entry)sender;
             HttpManager.SpreadsheetUrl = entry.Text;
             var xlsxFile = HttpManager.DownloadXlsxFile();
-            var teams = SpreadsheetManager.GetTeams(xlsxFile);
-            DebugLabel = string.Join(" ", teams);
-            teamPicker.ItemsSource = teams;
+            teams = SpreadsheetManager.GetTeams(xlsxFile);
+            DebugLabel = string.Join(" ", teams.Keys);
+            teamPicker.ItemsSource = teams.Keys.ToList();
         }
 
         private void TeamPickerSelectedIndexChanged(object sender, EventArgs e)
         {
             var picker = (Picker)sender;
-            DebugLabel = picker.Items[picker.SelectedIndex];
-            SpreadsheetManager.SubscribeToCell("A1", (time) =>
+            var team = picker.Items[picker.SelectedIndex];
+            DebugLabel = team;
+            SpreadsheetManager.SubscribeToCell(teams[team], (time) =>
             {
                 //MainThread.BeginInvokeOnMainThread(() =>
                 //{

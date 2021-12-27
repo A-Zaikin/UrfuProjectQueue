@@ -28,16 +28,14 @@ namespace ProjectQueue
             checkSpreadsheetTimer.Dispose();
         }
 
-        public static List<string> GetTeams(byte[] xlsxFile)
+        public static Dictionary<string, string> GetTeams(byte[] xlsxFile)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using (MemoryStream ms = new MemoryStream(xlsxFile))
             using (ExcelPackage package = new ExcelPackage(ms))
             {
                 var sheet = package.Workbook.Worksheets[0];
-                return FindTeams(sheet)
-                    .Select(cell => cell.Value.ToString())
-                    .ToList();
+                return FindTeams(sheet).ToDictionary(cell => cell.Value.ToString(), cell => cell.Address.ToString());
             }
         }
 
@@ -47,7 +45,7 @@ namespace ProjectQueue
             foreach (var cell in sheet.Cells)
             {
                 //if (cell.Value.ToString() == "Команда")
-                if (new Regex(@"^Команда ?\d*$").IsMatch(cell.Value.ToString()))
+                if (new Regex(@"^Комната ?\d*$").IsMatch(cell.Value.ToString()))
                 {
                     var previousCell = cell;
                     while (true)
