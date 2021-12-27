@@ -7,18 +7,27 @@
         <Frame BackgroundColor="#2196F3" Padding="24" CornerRadius="0">
             <Label Text="URFU Project Queue" HorizontalTextAlignment="Center" TextColor="White" FontSize="36"/>
         </Frame>
-        <Label Text="{Binding DebugLabel}"></Label>
-        <Entry 
-            x:Name="entry"
-            Text="https://docs.google.com/spreadsheets/d/1LZU6GiXYLOFSbL5ZqImKqNYzYhWiueqONTh__dop4zI/edit#gid=2095115966"
-            Completed="EntryCompleted"/>
-        <Picker
-            x:Name="teamPicker"
-            SelectedIndexChanged="TeamPickerSelectedIndexChanged"/>
+        <Label 
+            Text="{Binding DebugLabel}"
+            IsVisible="False"/>
+        <StackLayout VerticalOptions="Center" HorizontalOptions="Center">
+            <Entry 
+                VerticalOptions="Center"
+                x:Name="entry"
+                Text="https://docs.google.com/spreadsheets/d/1LZU6GiXYLOFSbL5ZqImKqNYzYhWiueqONTh__dop4zI/edit#gid=2095115966"
+                Completed="EntryCompleted"
+                IsVisible="True"/>
+            <Picker
+                x:Name="teamPicker"
+                SelectedIndexChanged="TeamPickerSelectedIndexChanged"
+                IsVisible="False"/>
 
-        <Button 
-            Text="Unsubscribe"
-            Pressed="UnsubscribeButtonPressed"/>
+            <Button 
+                x:Name="unsubscribeButton"
+                Text="Unsubscribe"
+                Pressed="UnsubscribeButtonPressed"
+                IsVisible="False"/>
+        </StackLayout>
     </StackLayout>
 
 </ContentPage>

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xamarin.Essentials;
+
 using Xamarin.Forms;
 
 namespace ProjectQueue
@@ -18,7 +18,7 @@ namespace ProjectQueue
             set
             {
                 debugLabel = value;
-                OnPropertyChanged(nameof(DebugLabel)); // Notify that there was a change on this property
+                OnPropertyChanged(nameof(DebugLabel));
             }
         }
 
@@ -29,7 +29,9 @@ namespace ProjectQueue
             notificationManager.Initialize();
             BindingContext = this;
 
+            entry = (Entry)FindByName("entry");
             teamPicker = (Picker)FindByName("teamPicker");
+            unsubscribeButton = (Button)FindByName("unsubscribeButton");
             DebugLabel = "New label text";
         }
 
@@ -41,6 +43,8 @@ namespace ProjectQueue
             teams = SpreadsheetManager.GetTeams(xlsxFile);
             DebugLabel = string.Join(" ", teams.Keys);
             teamPicker.ItemsSource = teams.Keys.ToList();
+            teamPicker.IsVisible = true;
+            unsubscribeButton.IsVisible = true;
         }
 
         private void TeamPickerSelectedIndexChanged(object sender, EventArgs e)
@@ -48,14 +52,10 @@ namespace ProjectQueue
             var picker = (Picker)sender;
             var team = picker.Items[picker.SelectedIndex];
             DebugLabel = team;
-            SpreadsheetManager.SubscribeToCell(teams[team], (time) =>
+            SpreadsheetManager.SubscribeToCell(teams[team], () =>
             {
-                //MainThread.BeginInvokeOnMainThread(() =>
-                //{
-                //    //DisplayAlert("Your queue!", time, "OK");
-                //    //SpreadsheetManager.Unsubscribe();
-                //});
-                notificationManager.SendNotification("Test title", time);
+                notificationManager.SendNotification("Подошла Ваша очередь на защиту!", $"Вы представляете команду \"{team}\"");
+                SpreadsheetManager.Unsubscribe();
             });
         }
 

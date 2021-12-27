@@ -14,9 +14,9 @@ namespace ProjectQueue
     {
         private static Timer checkSpreadsheetTimer;
         private static string subscribedAddress;
-        private static Action<string> subscribedCallback;
+        private static Action subscribedCallback;
 
-        public static void SubscribeToCell(string address, Action<string> callback)
+        public static void SubscribeToCell(string address, Action callback)
         {
             subscribedAddress = address;
             subscribedCallback = callback;
@@ -44,8 +44,8 @@ namespace ProjectQueue
             var teamCells = new List<ExcelRangeBase>();
             foreach (var cell in sheet.Cells)
             {
-                //if (cell.Value.ToString() == "Команда")
-                if (new Regex(@"^Комната ?\d*$").IsMatch(cell.Value.ToString()))
+                if (new Regex(@"^Комната ?\d*$").IsMatch(cell.Value.ToString())
+                    || cell.Value.ToString() == "Название команды")
                 {
                     var previousCell = cell;
                     while (true)
@@ -72,9 +72,9 @@ namespace ProjectQueue
             {
                 var sheet = package.Workbook.Worksheets[0];
                 var cell = sheet.Cells[subscribedAddress];
-                //subscribedCallback($"{DateTime.Now} - {cell.Value} - {cell.Style.Fill.BackgroundColor.Rgb}");
-                if (cell.Style.Fill.BackgroundColor.Rgb == "FF00FF00")
-                    subscribedCallback(DateTime.Now.ToString());
+                var upperCell = cell.Offset(-1, 0);
+                if (upperCell.Style.Fill.BackgroundColor.Rgb == "FF00FF00")
+                    subscribedCallback();
             }
         }
     }
