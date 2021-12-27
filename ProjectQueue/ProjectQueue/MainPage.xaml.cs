@@ -19,6 +19,8 @@ namespace ProjectQueue
     {
         private HttpClient client;
 
+        //private Picker teamPicker;
+
         private string debugLabel;
         public string DebugLabel
         {
@@ -35,55 +37,62 @@ namespace ProjectQueue
             InitializeComponent();
             BindingContext = this;
 
+            teamPicker = (Picker)FindByName("teamPicker");
             DebugLabel = "New label text";
-            client = new HttpClient();
         }
 
         void EntryCompleted(object sender, EventArgs e)
         {
             var entry = (Entry)sender;
             var text = entry.Text;
-            //DebugLabel = text;
-            var downloadUrl = FormDownloadUrl(text);
-            //DebugLabel = downloadUrl;
-            var xlsxFile = DownloadXlsxFile(downloadUrl);
+            var xlsxFile = HttpManager.DownloadXlsxFile(text);
             //DebugLabel = xlsxFile.Length.ToString();
-            var a1Value = OpenExcelFile(xlsxFile);
-            DebugLabel = a1Value;
+            var teams = OpenExcelFile(xlsxFile);
+            DebugLabel = string.Join(" ", teams);
+            teamPicker.ItemsSource = teams;
         }
 
-        string OpenExcelFile(byte[] xlsxFile)
+        List<string> OpenExcelFile(byte[] xlsxFile)
         {
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             using (MemoryStream ms = new MemoryStream(xlsxFile))
             using (ExcelPackage package = new ExcelPackage(ms))
             {
-                if (package.Workbook.Worksheets.Count == 0)
-                    return "Your Excel file does not contain any work sheets";
-                else
+                var sheet = package.Workbook.Worksheets[0];
+                return FindTeams(sheet)
+                    .Select(cell => cell.Value.ToString())
+                    .ToList();
+            }
+
+
+            List<ExcelRangeBase> FindTeams(ExcelWorksheet sheet)
+            {
+                var teamCells = new List<ExcelRangeBase>();
+                foreach (var cell in sheet.Cells)
                 {
-                    foreach (ExcelWorksheet worksheet in package.Workbook.Worksheets)
+                    //if (cell.Value.ToString() == "Команда")
+                    if (new Regex(@"^Команда ?\d*$").IsMatch(cell.Value.ToString()))
                     {
-                        return worksheet.Cells["A1"].Value.ToString();
+                        var previousCell = cell;
+                        while (true)
+                        {
+                            var currentCell = previousCell.Offset(1, 0);
+                            if (currentCell.Value == null || currentCell.Value.ToString() == "")
+                                break;
+                            else
+                            {
+                                teamCells.Add(currentCell);
+                                previousCell = currentCell;
+                            }
+                        }
                     }
                 }
+                return teamCells;
             }
-            return "Something failed...";
         }
 
-        string FormDownloadUrl(string inputUrl)
+        private void TeamPickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            var re = new Regex(@"\/d\/(.+)\/");
-            var match = re.Match(inputUrl);
-            var id = match.Groups[1].Value;
-            var downloadUrl = $"https://docs.google.com/spreadsheets/d/{id}/export?format=xlsx&id={id}";
-            return downloadUrl;
-        }
-
-        byte[] DownloadXlsxFile(string url)
-        {
-            var response = client.GetByteArrayAsync(url);
-            return response.Result;
         }
     }
 }

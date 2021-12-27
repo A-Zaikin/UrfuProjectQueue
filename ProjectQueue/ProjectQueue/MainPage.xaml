@@ -12,6 +12,9 @@
             x:Name="entry"
             Text="https://docs.google.com/spreadsheets/d/1LZU6GiXYLOFSbL5ZqImKqNYzYhWiueqONTh__dop4zI/edit#gid=2095115966"
             Completed="EntryCompleted"/>
+        <Picker
+            x:Name="teamPicker"
+            SelectedIndexChanged="TeamPickerSelectedIndexChanged"/>
     </StackLayout>
 
 </ContentPage>
