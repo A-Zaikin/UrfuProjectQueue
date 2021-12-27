@@ -7,6 +7,8 @@ namespace ProjectQueue
 {
     public partial class MainPage : ContentPage
     {
+        private INotificationManager notificationManager;
+
         private string debugLabel;
         public string DebugLabel
         {
@@ -21,6 +23,8 @@ namespace ProjectQueue
         public MainPage()
         {
             InitializeComponent();
+            notificationManager = DependencyService.Get<INotificationManager>();
+            notificationManager.Initialize();
             BindingContext = this;
 
             teamPicker = (Picker)FindByName("teamPicker");
@@ -43,10 +47,12 @@ namespace ProjectQueue
             DebugLabel = picker.Items[picker.SelectedIndex];
             SpreadsheetManager.SubscribeToCell("A1", (time) =>
             {
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    DisplayAlert("Your queue!", time, "OK");
-                });
+                //MainThread.BeginInvokeOnMainThread(() =>
+                //{
+                //    //DisplayAlert("Your queue!", time, "OK");
+                //    //SpreadsheetManager.Unsubscribe();
+                //});
+                notificationManager.SendNotification("Test title", time);
             });
         }
 
