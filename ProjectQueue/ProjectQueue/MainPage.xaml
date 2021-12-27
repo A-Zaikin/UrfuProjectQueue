@@ -15,6 +15,10 @@
         <Picker
             x:Name="teamPicker"
             SelectedIndexChanged="TeamPickerSelectedIndexChanged"/>
+
+        <Button 
+            Text="Unsubscribe"
+            Pressed="UnsubscribeButtonPressed"/>
     </StackLayout>
 
 </ContentPage>

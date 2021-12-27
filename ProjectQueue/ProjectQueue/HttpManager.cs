@@ -7,9 +7,11 @@ namespace ProjectQueue
     {
         private static HttpClient client = new HttpClient();
 
-        public static byte[] DownloadXlsxFile(string spreadsheetUrl)
+        public static string SpreadsheetUrl { get; set; }
+
+        public static byte[] DownloadXlsxFile()
         {
-            var url = FormDownloadUrl(spreadsheetUrl);
+            var url = FormDownloadUrl(SpreadsheetUrl);
             var response = client.GetByteArrayAsync(url);
             return response.Result;
         }
