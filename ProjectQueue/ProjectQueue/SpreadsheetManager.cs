@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 
 using OfficeOpenXml;
+using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Style;
 
 namespace ProjectQueue
@@ -75,7 +76,8 @@ namespace ProjectQueue
                 var sheet = package.Workbook.Worksheets[0];
                 var cell = sheet.Cells[subscribedAddress];
                 var upperCell = cell.Offset(-1, 0);
-                if (upperCell.Style.Fill.BackgroundColor.Rgb == "FF00FF00")
+                if ((upperCell.Style.Fill.BackgroundColor.Rgb != "FFFFFFFF" && upperCell.Style.Fill.BackgroundColor.Rgb != "") ||
+                    (upperCell.Style.Fill.BackgroundColor.Theme != null && upperCell.Style.Fill.BackgroundColor.Theme != eThemeSchemeColor.Background1))
                     subscribedCallback();
             }
         }
