@@ -61,8 +61,8 @@ namespace ProjectQueue.Droid
                 .SetContentIntent(pendingIntent)
                 .SetContentTitle(title)
                 .SetContentText(message)
-                .SetLargeIcon(BitmapFactory.DecodeResource(AndroidApp.Context.Resources, Resource.Drawable.notification_template_icon_bg))
-                .SetSmallIcon(Resource.Drawable.notification_template_icon_bg)
+                .SetLargeIcon(BitmapFactory.DecodeResource(AndroidApp.Context.Resources, Resource.Drawable.icon))
+                .SetSmallIcon(Resource.Drawable.logo_small_gray)
                 .SetDefaults((int)NotificationDefaults.Sound | (int)NotificationDefaults.Vibrate);
 
             Notification notification = builder.Build();
