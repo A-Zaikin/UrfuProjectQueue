@@ -47,7 +47,24 @@
 
             <Label
                 x:Name="timeLabel"
-                Text="This is underlined text."/>
+                Text="Среднее время защиты"/>
+            <StackLayout Spacing="10" x:Name="Options" IsVisible="false">
+                <CheckBox
+                    x:Name="Option1"/>
+                <Label
+                    x:Name="Option1Label"
+                    Text="Уведомление о вашей очереди"/>
+                <CheckBox
+                    x:Name="Option2"/>
+                <Label
+                    x:Name="Option2Label"
+                    Text="Уведомление о команде перед вас"/>
+                <CheckBox
+                    x:Name="Option3"/>
+                <Label
+                    x:Name="Option3Label"
+                    Text="Уведомление о 3 команде перед вами"/>
+            </StackLayout>
         </StackLayout>
     </StackLayout>
 

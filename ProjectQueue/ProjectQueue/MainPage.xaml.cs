@@ -39,6 +39,7 @@ namespace ProjectQueue
             unsubscribeButton = (Button)FindByName("unsubscribeButton");
             timeLabel = (Label)FindByName("timeLabel");
             DebugLabel = "New label text";
+            Options = (StackLayout)FindByName("Options");
         }
 
         private void EntryCompleted(object sender, EventArgs e)
@@ -57,16 +58,16 @@ namespace ProjectQueue
             if (picker.SelectedIndex < 0)
                 return;
             sheetNumber = sheets[picker.Items[picker.SelectedIndex]];
-
-            roomPicker.IsVisible = true;
-        }
-
-        private void RoomPickerSelectedIndexChanged(object sender, EventArgs e)
-        {
             teams = SpreadsheetManager.GetTeams(xlsxFile, sheetNumber);
             DebugLabel = string.Join(" ", teams.Keys);
             teamPicker.ItemsSource = teams.Keys.ToList();
             teamPicker.IsVisible = true;
+            //roomPicker.IsVisible = true;
+        }
+
+        private void RoomPickerSelectedIndexChanged(object sender, EventArgs e)
+        {
+            
         }
 
         private void TeamPickerSelectedIndexChanged(object sender, EventArgs e)
@@ -83,6 +84,7 @@ namespace ProjectQueue
             }, UpdateAverageTime);
             unsubscribeButton.IsVisible = true;
             messageManager.ShortAlert("Вы успешно подписаны");
+            Options.IsVisible = true;
         }
 
         private void UnsubscribeButtonPressed(object sender, EventArgs e)
@@ -91,6 +93,7 @@ namespace ProjectQueue
             sheetPicker.IsVisible = false;
             teamPicker.IsVisible = false;
             unsubscribeButton.IsVisible = false;
+            Options.IsVisible = false;
         }
 
         private void UpdateAverageTime()
@@ -102,7 +105,8 @@ namespace ProjectQueue
                 var averageTime = timeDiffs.Average(timeSpan => timeSpan.TotalSeconds);
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    timeLabel.Text = TimeSpan.FromSeconds(averageTime).ToString();
+                    var timeSpan = TimeSpan.FromSeconds(averageTime);
+                    timeLabel.Text = $"Среднее время защиты: {timeSpan.Minutes} минут {timeSpan.Seconds} секунд";
                 });
             }
         }
