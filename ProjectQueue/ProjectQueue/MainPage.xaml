@@ -20,6 +20,19 @@
                 IsVisible="True"
                 Keyboard="Url"
                 Placeholder="Ссылка на таблицу"/>
+
+            <Picker
+                x:Name="sheetPicker"
+                SelectedIndexChanged="SheetPickerSelectedIndexChanged"
+                Title="Выберите лист"
+                IsVisible="False"/>
+
+            <Picker
+                x:Name="roomPicker"
+                SelectedIndexChanged="RoomPickerSelectedIndexChanged"
+                Title="Выберите комнату"
+                IsVisible="False"/>
+
             <Picker
                 x:Name="teamPicker"
                 SelectedIndexChanged="TeamPickerSelectedIndexChanged"

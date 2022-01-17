@@ -33,13 +33,23 @@ namespace ProjectQueue
             checkSpreadsheetTimer.Dispose();
         }
 
-        public static Dictionary<string, string> GetTeams(byte[] xlsxFile)
+        public static Dictionary<string, int> GetSheets(byte[] xlsxFile)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using (MemoryStream ms = new MemoryStream(xlsxFile))
             using (ExcelPackage package = new ExcelPackage(ms))
             {
-                var sheet = package.Workbook.Worksheets[0];
+                return package.Workbook.Worksheets.ToDictionary(sheet => sheet.Name, sheet => sheet.Index);
+            }
+        }
+
+        public static Dictionary<string, string> GetTeams(byte[] xlsxFile, int sheetNumber)
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (MemoryStream ms = new MemoryStream(xlsxFile))
+            using (ExcelPackage package = new ExcelPackage(ms))
+            {
+                var sheet = package.Workbook.Worksheets[sheetNumber];
                 return FindTeams(sheet).ToDictionary(cell => cell.Value.ToString(), cell => cell.Address.ToString());
             }
         }

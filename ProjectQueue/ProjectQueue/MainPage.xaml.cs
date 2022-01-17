@@ -12,6 +12,9 @@ namespace ProjectQueue
         private IMessageManager messageManager;
         private string debugLabel;
         private Dictionary<string, string> teams;
+        private Dictionary<string, int> sheets;
+        private byte[] xlsxFile;
+        private int sheetNumber = 0;
         public string DebugLabel
         {
             get { return debugLabel; }
@@ -32,6 +35,7 @@ namespace ProjectQueue
 
             entry = (Entry)FindByName("entry");
             teamPicker = (Picker)FindByName("teamPicker");
+            sheetPicker = (Picker) FindByName("sheetPicker");
             unsubscribeButton = (Button)FindByName("unsubscribeButton");
             timeLabel = (Label)FindByName("timeLabel");
             DebugLabel = "New label text";
@@ -41,8 +45,25 @@ namespace ProjectQueue
         {
             var entry = (Entry)sender;
             HttpManager.SpreadsheetUrl = entry.Text;
-            var xlsxFile = HttpManager.DownloadXlsxFile();
-            teams = SpreadsheetManager.GetTeams(xlsxFile);
+            xlsxFile = HttpManager.DownloadXlsxFile();
+            sheets = SpreadsheetManager.GetSheets(xlsxFile);
+            sheetPicker.ItemsSource = sheets.Keys.ToList();
+            sheetPicker.IsVisible = true;
+        }
+
+        private void SheetPickerSelectedIndexChanged(object sender, EventArgs e)
+        {
+            var picker = (Picker)sender;
+            if (picker.SelectedIndex < 0)
+                return;
+            sheetNumber = sheets[picker.Items[picker.SelectedIndex]];
+
+            roomPicker.IsVisible = true;
+        }
+
+        private void RoomPickerSelectedIndexChanged(object sender, EventArgs e)
+        {
+            teams = SpreadsheetManager.GetTeams(xlsxFile, sheetNumber);
             DebugLabel = string.Join(" ", teams.Keys);
             teamPicker.ItemsSource = teams.Keys.ToList();
             teamPicker.IsVisible = true;
@@ -67,6 +88,7 @@ namespace ProjectQueue
         private void UnsubscribeButtonPressed(object sender, EventArgs e)
         {
             SpreadsheetManager.Unsubscribe();
+            sheetPicker.IsVisible = false;
             teamPicker.IsVisible = false;
             unsubscribeButton.IsVisible = false;
         }
