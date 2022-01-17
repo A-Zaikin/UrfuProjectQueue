@@ -7,21 +7,24 @@ using System.Threading;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
-using OfficeOpenXml.Style;
 
 namespace ProjectQueue
 {
     public static class SpreadsheetManager
     {
+        public static Dictionary<string, DateTime> TeamCompletionTimes = new Dictionary<string, DateTime>();
+
         private static Timer checkSpreadsheetTimer;
         private static string subscribedAddress;
         private static Action subscribedCallback;
+        private static Action updateTimeCallback;
 
-        public static void SubscribeToCell(string address, Action callback)
+        public static void SubscribeToCell(string address, Action callback, Action updateTime)
         {
             subscribedAddress = address;
             subscribedCallback = callback;
             checkSpreadsheetTimer = new Timer(CheckCellReadiness, null, 0, 3000);
+            updateTimeCallback = updateTime;
         }
 
         public static void Unsubscribe()
@@ -47,8 +50,7 @@ namespace ProjectQueue
             {
                 if (cell.Value == null)
                     continue;
-                if (new Regex(@"^Комната ?\d*$").IsMatch(cell.Value.ToString())
-                    || cell.Value.ToString() == "Название команды")
+                if (IsRoomHeader(cell.Value.ToString()))
                 {
                     var previousCell = cell;
                     while (true)
@@ -76,10 +78,37 @@ namespace ProjectQueue
                 var sheet = package.Workbook.Worksheets[0];
                 var cell = sheet.Cells[subscribedAddress];
                 var upperCell = cell.Offset(-1, 0);
-                if ((upperCell.Style.Fill.BackgroundColor.Rgb != "FFFFFFFF" && upperCell.Style.Fill.BackgroundColor.Rgb != "") ||
-                    (upperCell.Style.Fill.BackgroundColor.Theme != null && upperCell.Style.Fill.BackgroundColor.Theme != eThemeSchemeColor.Background1))
+                CheckCompletionTimes(upperCell);
+                if (IsColored(upperCell))
                     subscribedCallback();
             }
+        }
+
+        private static void CheckCompletionTimes(ExcelRangeBase cell)
+        {
+            var currentCell = cell;
+            while (!IsRoomHeader(currentCell.Value.ToString()))
+            {
+                if (!TeamCompletionTimes.ContainsKey(currentCell.Address) && IsColored(currentCell))
+                {
+                    TeamCompletionTimes.Add(currentCell.Address, DateTime.Now);
+                }
+                currentCell = currentCell.Offset(-1, 0);
+            }
+            updateTimeCallback();
+        }
+
+        private static bool IsRoomHeader(string value)
+        {
+            return new Regex(@"^Комната ?\d*$").IsMatch(value) || value == "Название команды";
+        }
+
+        private static bool IsColored(ExcelRangeBase cell)
+        {
+            return (cell.Style.Fill.BackgroundColor.Rgb != "FFFFFFFF"
+                && cell.Style.Fill.BackgroundColor.Rgb != "")
+                || (cell.Style.Fill.BackgroundColor.Theme != null
+                && cell.Style.Fill.BackgroundColor.Theme != eThemeSchemeColor.Background1);
         }
     }
 }

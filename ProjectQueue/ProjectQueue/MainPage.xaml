@@ -31,6 +31,10 @@
                 Text="Отписаться"
                 Pressed="UnsubscribeButtonPressed"
                 IsVisible="False"/>
+
+            <Label
+                x:Name="timeLabel"
+                Text="This is underlined text."/>
         </StackLayout>
     </StackLayout>
 

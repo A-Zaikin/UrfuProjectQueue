@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace ProjectQueue
@@ -33,6 +33,7 @@ namespace ProjectQueue
             entry = (Entry)FindByName("entry");
             teamPicker = (Picker)FindByName("teamPicker");
             unsubscribeButton = (Button)FindByName("unsubscribeButton");
+            timeLabel = (Label)FindByName("timeLabel");
             DebugLabel = "New label text";
         }
 
@@ -58,7 +59,7 @@ namespace ProjectQueue
             {
                 notificationManager.SendNotification("Подошла Ваша очередь на защиту!", $"Вы представляете команду \"{team}\"");
                 SpreadsheetManager.Unsubscribe();
-            });
+            }, UpdateAverageTime);
             unsubscribeButton.IsVisible = true;
             messageManager.ShortAlert("Вы успешно подписаны");
         }
@@ -68,6 +69,20 @@ namespace ProjectQueue
             SpreadsheetManager.Unsubscribe();
             teamPicker.IsVisible = false;
             unsubscribeButton.IsVisible = false;
+        }
+
+        private void UpdateAverageTime()
+        {
+            var times = SpreadsheetManager.TeamCompletionTimes.Values;
+            if (times.Count > 1)
+            {
+                var timeDiffs = times.Zip(times.Skip(1), (time1, time2) => time2 - time1);
+                var averageTime = timeDiffs.Average(timeSpan => timeSpan.TotalSeconds);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    timeLabel.Text = TimeSpan.FromSeconds(averageTime).ToString();
+                });
+            }
         }
     }
 }
