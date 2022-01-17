@@ -13,8 +13,8 @@ namespace ProjectQueue
         private string debugLabel;
         private Dictionary<string, string> teams;
         private Dictionary<string, int> sheets;
+        private Dictionary<string, string> rooms;
         private byte[] xlsxFile;
-        private int sheetNumber = 0;
         public string DebugLabel
         {
             get { return debugLabel; }
@@ -61,18 +61,35 @@ namespace ProjectQueue
             var picker = (Picker)sender;
             if (picker.SelectedIndex < 0)
                 return;
-            sheetNumber = sheets[picker.Items[picker.SelectedIndex]];
-            teams = SpreadsheetManager.GetTeams(xlsxFile, sheetNumber);
-            DebugLabel = string.Join(" ", teams.Keys);
-            teamPicker.ItemsSource = teams.Keys.ToList();
-            teamPicker.IsVisible = true;
-            //roomPicker.IsVisible = true;
+            SpreadsheetManager.SetSheetIndex(sheets[picker.Items[picker.SelectedIndex]]);
+            rooms = SpreadsheetManager.GetRooms(xlsxFile);
+            if (rooms.Count > 1)
+            {
+                roomPicker.IsVisible = true;
+                roomPicker.ItemsSource = rooms.Keys.ToList();
+            }
+            else
+            {
+                SelectRoom(rooms.Keys.ToList()[0]);
+            }
         }
 
         private void RoomPickerSelectedIndexChanged(object sender, EventArgs e)
         {
-
+            var picker = (Picker)sender;
+            if (picker.SelectedIndex < 0)
+                return;
+            SelectRoom(picker.Items[picker.SelectedIndex]);
         }
+
+        private void SelectRoom(string roomName)
+        {
+            var room = rooms[roomName];
+            teams = SpreadsheetManager.GetTeams(xlsxFile, room);
+            teamPicker.ItemsSource = teams.Keys.ToList();
+            teamPicker.IsVisible = true;
+        }
+
 
         private void TeamPickerSelectedIndexChanged(object sender, EventArgs e)
         {
@@ -85,7 +102,7 @@ namespace ProjectQueue
             bool notification3Sent = false;
             SpreadsheetManager.SubscribeToCell(teams[team], (state) =>
             {
-                if (Option3.IsChecked && state == SpreadsheetManager.TeamNumber.TeamUp3 && !notification3Sent)
+                if (Option3.IsChecked && state == SpreadsheetManager.TeamNumber.TeamUp4 && !notification3Sent)
                 {
                     notificationManager.SendNotification("Осталось 3 защиты перед вами!",
                         $"Самое время подготовиться к выступлению");
@@ -134,7 +151,12 @@ namespace ProjectQueue
                     timeCaptionLabel.IsVisible = true;
                     var timeSpan = TimeSpan.FromSeconds(averageTime * SpreadsheetManager.TeamsLeftCount);
                     //timeLabel.Text = $"Среднее время защиты: {timeSpan.Minutes} минут {timeSpan.Seconds} секунд";
-                    timeLabel.Text = $"{timeSpan.Minutes} минут {timeSpan.Seconds} секунд";
+                    var text = "";
+                    if (timeSpan.Minutes != 0)
+                        text += $"{timeSpan.Minutes} мин ";
+                    if (timeSpan.Seconds != 0)
+                        text += $"{timeSpan.Seconds} сек";
+                    timeLabel.Text = text;
                 });
             }
         }

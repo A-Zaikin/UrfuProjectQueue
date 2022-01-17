@@ -74,17 +74,18 @@
                         Text="Уведомление о 3 команде перед вами"/>
                 </StackLayout>
             </StackLayout>
+            <StackLayout Spacing="5">
+                <Label
+                    x:Name="timeCaptionLabel"
+                    HorizontalOptions="Center"
+                    Text="Примерное время до вашей защиты:"
+                    IsVisible="False"/>
 
-            <Label
-                x:Name="timeCaptionLabel"
-                HorizontalOptions="Center"
-                Text="Примерное время до вашей защиты"
-                IsVisible="False"/>
-            
-            <Label
-                x:Name="timeLabel"
-                HorizontalOptions="Center"
-                IsVisible="False"/>
+                <Label
+                    x:Name="timeLabel"
+                    HorizontalOptions="Center"
+                    IsVisible="False"/>
+            </StackLayout>
         </StackLayout>
     </StackLayout>
 

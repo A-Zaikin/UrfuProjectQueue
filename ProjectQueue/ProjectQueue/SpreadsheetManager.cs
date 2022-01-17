@@ -20,6 +20,7 @@ namespace ProjectQueue
         private static string subscribedAddress;
         private static Action<TeamNumber> subscribedCallback;
         private static Action updateTimeCallback;
+        private static int sheetIndex = 0;
 
         public static void SubscribeToCell(string address, Action<TeamNumber> callback, Action updateTime)
         {
@@ -34,6 +35,11 @@ namespace ProjectQueue
             checkSpreadsheetTimer.Dispose();
         }
 
+        public static void SetSheetIndex(int index)
+        {
+            sheetIndex = index;
+        }
+
         public static Dictionary<string, int> GetSheets(byte[] xlsxFile)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -44,41 +50,56 @@ namespace ProjectQueue
             }
         }
 
-        public static Dictionary<string, string> GetTeams(byte[] xlsxFile, int sheetNumber)
+        public static Dictionary<string, string> GetRooms(byte[] xlsxFile)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using (MemoryStream ms = new MemoryStream(xlsxFile))
             using (ExcelPackage package = new ExcelPackage(ms))
             {
-                var sheet = package.Workbook.Worksheets[sheetNumber];
-                return FindTeams(sheet).ToDictionary(cell => cell.Value.ToString(), cell => cell.Address.ToString());
+                var sheet = package.Workbook.Worksheets[sheetIndex];
+                return FindRooms(sheet).ToDictionary(cell => cell.Value.ToString(), cell => cell.Address.ToString());
             }
         }
 
-        private static List<ExcelRangeBase> FindTeams(ExcelWorksheet sheet)
+        public static Dictionary<string, string> GetTeams(byte[] xlsxFile, string roomAddress)
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (MemoryStream ms = new MemoryStream(xlsxFile))
+            using (ExcelPackage package = new ExcelPackage(ms))
+            {
+                var sheet = package.Workbook.Worksheets[sheetIndex];
+                return FindTeams(sheet, roomAddress).ToDictionary(cell => cell.Value.ToString(), cell => cell.Address.ToString());
+            }
+        }
+
+        private static List<ExcelRangeBase> FindTeams(ExcelWorksheet sheet, string roomAddress)
         {
             var teamCells = new List<ExcelRangeBase>();
+            var previousCell = (ExcelRangeBase)sheet.Cells[roomAddress];
+            while (true)
+            {
+                var currentCell = previousCell.Offset(1, 0);
+                if (currentCell.Value == null || currentCell.Value.ToString() == "")
+                    break;
+                teamCells.Add(currentCell);
+                previousCell = currentCell;
+            }
+            return teamCells;
+        }
+
+        private static List<ExcelRangeBase> FindRooms(ExcelWorksheet sheet)
+        {
+            var roomCells = new List<ExcelRangeBase>();
             foreach (var cell in sheet.Cells)
             {
                 if (cell.Value == null)
                     continue;
                 if (IsRoomHeader(cell.Value.ToString()))
                 {
-                    var previousCell = cell;
-                    while (true)
-                    {
-                        var currentCell = previousCell.Offset(1, 0);
-                        if (currentCell.Value == null || currentCell.Value.ToString() == "")
-                            break;
-                        else
-                        {
-                            teamCells.Add(currentCell);
-                            previousCell = currentCell;
-                        }
-                    }
+                    roomCells.Add(cell);
                 }
             }
-            return teamCells;
+            return roomCells;
         }
 
         private static void CheckCellReadiness(object state)
@@ -87,7 +108,7 @@ namespace ProjectQueue
             using (MemoryStream ms = new MemoryStream(xlsxFile))
             using (ExcelPackage package = new ExcelPackage(ms))
             {
-                var sheet = package.Workbook.Worksheets[0];
+                var sheet = package.Workbook.Worksheets[sheetIndex];
                 var cell = sheet.Cells[subscribedAddress];
                 var upperCell = cell.Offset(-1, 0);
                 CheckCompletionTimes(upperCell);
@@ -95,8 +116,8 @@ namespace ProjectQueue
                     subscribedCallback(TeamNumber.TeamUp1);
                 else if (IsColored(cell.Offset(-2, 0)))
                     subscribedCallback(TeamNumber.TeamUp2);
-                else if (IsColored(cell.Offset(-3, 0)))
-                    subscribedCallback(TeamNumber.TeamUp3);
+                else if (IsColored(cell.Offset(-4, 0)))
+                    subscribedCallback(TeamNumber.TeamUp4);
             }
         }
 
@@ -123,13 +144,13 @@ namespace ProjectQueue
 
         private static bool IsRoomHeader(string value)
         {
-            return new Regex(@"^Комната ?\d*$").IsMatch(value) || value == "Название команды";
+            return new Regex(@"Комната ?").IsMatch(value) || value == "Название команды";
         }
 
         private static bool IsColored(ExcelRangeBase cell)
         {
             return (cell.Style.Fill.BackgroundColor.Rgb != "FFFFFFFF"
-                && cell.Style.Fill.BackgroundColor.Rgb != "")
+                && !string.IsNullOrEmpty(cell.Style.Fill.BackgroundColor.Rgb))
                 || (cell.Style.Fill.BackgroundColor.Theme != null
                 && cell.Style.Fill.BackgroundColor.Theme != eThemeSchemeColor.Background1);
         }
@@ -138,7 +159,7 @@ namespace ProjectQueue
         {
             TeamUp1,
             TeamUp2,
-            TeamUp3
+            TeamUp4
         }
     }
 }
