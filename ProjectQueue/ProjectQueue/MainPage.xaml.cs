@@ -43,6 +43,7 @@ namespace ProjectQueue
             Option1 = (CheckBox)FindByName("Option1");
             Option2 = (CheckBox)FindByName("Option2");
             Option3 = (CheckBox)FindByName("Option3");
+            timeCaptionLabel = (Label)FindByName("timeCaptionLabel");
         }
 
         private void EntryCompleted(object sender, EventArgs e)
@@ -99,6 +100,10 @@ namespace ProjectQueue
                 {
                     notificationManager.SendNotification("Подошла Ваша очередь на защиту!", $"Вы представляете команду \"{team}\"");
                     SpreadsheetManager.Unsubscribe();
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        timeLabel.Text = "Ваша очередь подошла";
+                    });
                 }
             }, UpdateAverageTime);
             unsubscribeButton.IsVisible = true;
@@ -126,8 +131,10 @@ namespace ProjectQueue
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     timeLabel.IsVisible = true;
-                    var timeSpan = TimeSpan.FromSeconds(averageTime);
-                    timeLabel.Text = $"Среднее время защиты: {timeSpan.Minutes} минут {timeSpan.Seconds} секунд";
+                    timeCaptionLabel.IsVisible = true;
+                    var timeSpan = TimeSpan.FromSeconds(averageTime * SpreadsheetManager.TeamsLeftCount);
+                    //timeLabel.Text = $"Среднее время защиты: {timeSpan.Minutes} минут {timeSpan.Seconds} секунд";
+                    timeLabel.Text = $"{timeSpan.Minutes} минут {timeSpan.Seconds} секунд";
                 });
             }
         }

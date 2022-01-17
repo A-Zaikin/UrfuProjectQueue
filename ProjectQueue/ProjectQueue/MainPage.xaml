@@ -76,8 +76,14 @@
             </StackLayout>
 
             <Label
+                x:Name="timeCaptionLabel"
+                HorizontalOptions="Center"
+                Text="Примерное время до вашей защиты"
+                IsVisible="False"/>
+            
+            <Label
                 x:Name="timeLabel"
-                Text="Среднее время защиты"
+                HorizontalOptions="Center"
                 IsVisible="False"/>
         </StackLayout>
     </StackLayout>

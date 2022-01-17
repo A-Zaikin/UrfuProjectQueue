@@ -13,6 +13,7 @@ namespace ProjectQueue
     public static class SpreadsheetManager
     {
         public static List<DateTime> TeamCompletionTimes = new List<DateTime>();
+        public static int TeamsLeftCount = 0;
 
         private static HashSet<string> completedTeams = new HashSet<string>();
         private static Timer checkSpreadsheetTimer;
@@ -102,8 +103,13 @@ namespace ProjectQueue
         private static void CheckCompletionTimes(ExcelRangeBase cell)
         {
             var currentCell = cell;
+            var newTeamsLeftCount = 0;
             while (!IsRoomHeader(currentCell.Value.ToString()))
             {
+                if (!IsColored(currentCell))
+                {
+                    newTeamsLeftCount++;
+                }
                 if (!completedTeams.Contains(currentCell.Address) && IsColored(currentCell))
                 {
                     completedTeams.Add(currentCell.Address);
@@ -111,6 +117,7 @@ namespace ProjectQueue
                 }
                 currentCell = currentCell.Offset(-1, 0);
             }
+            TeamsLeftCount = newTeamsLeftCount;
             updateTimeCallback();
         }
 
