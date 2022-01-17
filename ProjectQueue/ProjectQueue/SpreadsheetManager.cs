@@ -17,10 +17,10 @@ namespace ProjectQueue
         private static HashSet<string> completedTeams = new HashSet<string>();
         private static Timer checkSpreadsheetTimer;
         private static string subscribedAddress;
-        private static Action subscribedCallback;
+        private static Action<TeamNumber> subscribedCallback;
         private static Action updateTimeCallback;
 
-        public static void SubscribeToCell(string address, Action callback, Action updateTime)
+        public static void SubscribeToCell(string address, Action<TeamNumber> callback, Action updateTime)
         {
             subscribedAddress = address;
             subscribedCallback = callback;
@@ -91,7 +91,11 @@ namespace ProjectQueue
                 var upperCell = cell.Offset(-1, 0);
                 CheckCompletionTimes(upperCell);
                 if (IsColored(upperCell))
-                    subscribedCallback();
+                    subscribedCallback(TeamNumber.TeamUp1);
+                else if (IsColored(cell.Offset(-2, 0)))
+                    subscribedCallback(TeamNumber.TeamUp2);
+                else if (IsColored(cell.Offset(-3, 0)))
+                    subscribedCallback(TeamNumber.TeamUp3);
             }
         }
 
@@ -121,6 +125,13 @@ namespace ProjectQueue
                 && cell.Style.Fill.BackgroundColor.Rgb != "")
                 || (cell.Style.Fill.BackgroundColor.Theme != null
                 && cell.Style.Fill.BackgroundColor.Theme != eThemeSchemeColor.Background1);
+        }
+
+        public enum TeamNumber
+        {
+            TeamUp1,
+            TeamUp2,
+            TeamUp3
         }
     }
 }

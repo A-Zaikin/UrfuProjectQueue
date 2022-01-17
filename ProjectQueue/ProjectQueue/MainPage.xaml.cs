@@ -41,6 +41,8 @@ namespace ProjectQueue
             DebugLabel = "New label text";
             Options = (StackLayout)FindByName("Options");
             Option1 = (CheckBox)FindByName("Option1");
+            Option2 = (CheckBox)FindByName("Option2");
+            Option3 = (CheckBox)FindByName("Option3");
         }
 
         private void EntryCompleted(object sender, EventArgs e)
@@ -68,7 +70,7 @@ namespace ProjectQueue
 
         private void RoomPickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            
+
         }
 
         private void TeamPickerSelectedIndexChanged(object sender, EventArgs e)
@@ -78,11 +80,26 @@ namespace ProjectQueue
                 return;
             var team = picker.Items[picker.SelectedIndex];
             DebugLabel = team;
-            SpreadsheetManager.SubscribeToCell(teams[team], () =>
+            bool notification2Sent = false;
+            bool notification3Sent = false;
+            SpreadsheetManager.SubscribeToCell(teams[team], (state) =>
             {
-                if (Option1.IsChecked)
+                if (Option3.IsChecked && state == SpreadsheetManager.TeamNumber.TeamUp3 && !notification3Sent)
+                {
+                    notificationManager.SendNotification("Осталось 3 защиты перед вами!",
+                        $"Самое время подготовиться к выступлению");
+                    notification3Sent = true;
+                }
+                else if (Option2.IsChecked && state == SpreadsheetManager.TeamNumber.TeamUp2 && !notification2Sent)
+                {
+                    notificationManager.SendNotification("Выступает команда перед вами!", $"Самое время зайти на встречу Teams");
+                    notification2Sent = true;
+                }
+                else if (Option1.IsChecked && state == SpreadsheetManager.TeamNumber.TeamUp1)
+                {
                     notificationManager.SendNotification("Подошла Ваша очередь на защиту!", $"Вы представляете команду \"{team}\"");
-                SpreadsheetManager.Unsubscribe();
+                    SpreadsheetManager.Unsubscribe();
+                }
             }, UpdateAverageTime);
             unsubscribeButton.IsVisible = true;
             messageManager.ShortAlert("Вы успешно подписаны");

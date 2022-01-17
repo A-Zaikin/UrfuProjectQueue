@@ -45,10 +45,6 @@
                 Pressed="UnsubscribeButtonPressed"
                 IsVisible="False"/>
 
-            <Label
-                x:Name="timeLabel"
-                Text="Среднее время защиты"
-                IsVisible="False"/>
             <StackLayout Spacing="10" x:Name="Options" IsVisible="false">
                 <StackLayout Orientation="Horizontal">
                     <CheckBox
@@ -78,6 +74,11 @@
                         Text="Уведомление о 3 команде перед вами"/>
                 </StackLayout>
             </StackLayout>
+
+            <Label
+                x:Name="timeLabel"
+                Text="Среднее время защиты"
+                IsVisible="False"/>
         </StackLayout>
     </StackLayout>
 
