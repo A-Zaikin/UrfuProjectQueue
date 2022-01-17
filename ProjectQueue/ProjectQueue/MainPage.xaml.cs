@@ -40,6 +40,7 @@ namespace ProjectQueue
             timeLabel = (Label)FindByName("timeLabel");
             DebugLabel = "New label text";
             Options = (StackLayout)FindByName("Options");
+            Option1 = (CheckBox)FindByName("Option1");
         }
 
         private void EntryCompleted(object sender, EventArgs e)
@@ -79,7 +80,8 @@ namespace ProjectQueue
             DebugLabel = team;
             SpreadsheetManager.SubscribeToCell(teams[team], () =>
             {
-                notificationManager.SendNotification("Подошла Ваша очередь на защиту!", $"Вы представляете команду \"{team}\"");
+                if (Option1.IsChecked)
+                    notificationManager.SendNotification("Подошла Ваша очередь на защиту!", $"Вы представляете команду \"{team}\"");
                 SpreadsheetManager.Unsubscribe();
             }, UpdateAverageTime);
             unsubscribeButton.IsVisible = true;
@@ -94,6 +96,7 @@ namespace ProjectQueue
             teamPicker.IsVisible = false;
             unsubscribeButton.IsVisible = false;
             Options.IsVisible = false;
+            timeLabel.IsVisible = false;
         }
 
         private void UpdateAverageTime()
@@ -105,6 +108,7 @@ namespace ProjectQueue
                 var averageTime = timeDiffs.Average(timeSpan => timeSpan.TotalSeconds);
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
+                    timeLabel.IsVisible = true;
                     var timeSpan = TimeSpan.FromSeconds(averageTime);
                     timeLabel.Text = $"Среднее время защиты: {timeSpan.Minutes} минут {timeSpan.Seconds} секунд";
                 });

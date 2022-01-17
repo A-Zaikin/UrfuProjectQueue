@@ -47,23 +47,36 @@
 
             <Label
                 x:Name="timeLabel"
-                Text="Среднее время защиты"/>
+                Text="Среднее время защиты"
+                IsVisible="False"/>
             <StackLayout Spacing="10" x:Name="Options" IsVisible="false">
-                <CheckBox
-                    x:Name="Option1"/>
-                <Label
-                    x:Name="Option1Label"
-                    Text="Уведомление о вашей очереди"/>
-                <CheckBox
-                    x:Name="Option2"/>
-                <Label
-                    x:Name="Option2Label"
-                    Text="Уведомление о команде перед вас"/>
-                <CheckBox
-                    x:Name="Option3"/>
-                <Label
-                    x:Name="Option3Label"
-                    Text="Уведомление о 3 команде перед вами"/>
+                <StackLayout Orientation="Horizontal">
+                    <CheckBox
+                        x:Name="Option1"
+                        IsChecked="True"/>
+                    <Label
+                        x:Name="Option1Label"
+                        VerticalOptions="Center"
+                        Text="Уведомление о вашей очереди"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <CheckBox
+                        x:Name="Option2"
+                        IsChecked="True"/>
+                    <Label
+                        x:Name="Option2Label"
+                        VerticalOptions="Center"
+                        Text="Уведомление о команде перед вас"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <CheckBox
+                        x:Name="Option3"
+                        IsChecked="True"/>
+                    <Label
+                        x:Name="Option3Label"
+                        VerticalOptions="Center"
+                        Text="Уведомление о 3 команде перед вами"/>
+                </StackLayout>
             </StackLayout>
         </StackLayout>
     </StackLayout>
