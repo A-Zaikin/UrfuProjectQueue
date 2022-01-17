@@ -12,8 +12,9 @@ namespace ProjectQueue
 {
     public static class SpreadsheetManager
     {
-        public static Dictionary<string, DateTime> TeamCompletionTimes = new Dictionary<string, DateTime>();
+        public static List<DateTime> TeamCompletionTimes = new List<DateTime>();
 
+        private static HashSet<string> completedTeams = new HashSet<string>();
         private static Timer checkSpreadsheetTimer;
         private static string subscribedAddress;
         private static Action subscribedCallback;
@@ -89,9 +90,10 @@ namespace ProjectQueue
             var currentCell = cell;
             while (!IsRoomHeader(currentCell.Value.ToString()))
             {
-                if (!TeamCompletionTimes.ContainsKey(currentCell.Address) && IsColored(currentCell))
+                if (!completedTeams.Contains(currentCell.Address) && IsColored(currentCell))
                 {
-                    TeamCompletionTimes.Add(currentCell.Address, DateTime.Now);
+                    completedTeams.Add(currentCell.Address);
+                    TeamCompletionTimes.Add(DateTime.Now);
                 }
                 currentCell = currentCell.Offset(-1, 0);
             }

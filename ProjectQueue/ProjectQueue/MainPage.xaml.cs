@@ -73,7 +73,7 @@ namespace ProjectQueue
 
         private void UpdateAverageTime()
         {
-            var times = SpreadsheetManager.TeamCompletionTimes.Values;
+            var times = SpreadsheetManager.TeamCompletionTimes;
             if (times.Count > 1)
             {
                 var timeDiffs = times.Zip(times.Skip(1), (time1, time2) => time2 - time1);
